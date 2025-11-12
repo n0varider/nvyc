@@ -1,0 +1,17 @@
+%import nvio.nv
+
+func main() -> int32 {
+    let x = 1;
+    let y = 2;
+    let arr = int32[2];
+
+    arr[0] = x;
+    arr[1] = y;
+
+    // As of writing this, looping through arrays is not implemented
+    let a = arr[0];
+    let b = arr[1];
+
+    printf("%d %d\n", a, b);
+    return 0;
+}

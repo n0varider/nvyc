@@ -40,7 +40,7 @@ public class Test {
     public static void main(String[] args) throws IOException {
         String dir = "./";
 
-        // nvc <input> <flags> -o <output>
+        // nvyc <input> <flags> -o <output>
         input = args[0];
         output = args[1];
 
@@ -48,7 +48,7 @@ public class Test {
         if(output.endsWith(".flat")) flatten = true;
 
         if(!err.NV_FILE_IS_SOURCE(input)) {
-            err.NV_STDERRF("%s is not an NV source file! Expected %s.nv%n", input, input);
+            err.NV_STDERRF("%s is not an Nvy source file! Expected %s.nvy%n", input, input);
             System.exit(1);
         }
 
@@ -63,7 +63,7 @@ public class Test {
         List<String> llvmir = generateLLVM(input, dir);
         llvmir.add(0, target_triple);
 
-        writeToFile(output + "_nv_tmp.ll", llvmir, "");
+        writeToFile(output + "_nvy_tmp.ll", llvmir, "");
 
     }
 
@@ -189,13 +189,5 @@ public class Test {
         if(CHECKPOINTS) err.NV_TMP("Passed codegen");
 
         return ll;
-    }
-
-    static void parseFlags(String[] flags) {
-        for(int i = 1; i < flags.length; i++) {
-            if(flags[i].equals("-vlex")) {
-
-            }
-        }
     }
 }

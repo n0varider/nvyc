@@ -1,0 +1,4 @@
+// Other functions exist in the full library, but are unused for samples
+
+// Pulled from libc
+native func printf(string s, unified args) -> int32;

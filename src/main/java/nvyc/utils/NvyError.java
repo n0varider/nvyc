@@ -83,7 +83,7 @@ public class NvyError {
     }
 
     public boolean NV_FILE_IS_SOURCE(String s) {
-        return s.endsWith(".nv");
+        return s.endsWith(".nvy");
     }
 
     public int FAILCOMPILE(ErrorType error, String aux) {

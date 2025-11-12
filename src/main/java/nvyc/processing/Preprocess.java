@@ -22,14 +22,14 @@ public class Preprocess {
         return functionNameMap;
     }
 
-    public List<String> resolveImports(String module, List<String> init) throws FileNotFoundException {
+    public List<String> resolveImports(String module, List<String> init) {
         module = module.substring(0, module.length() - 3);
         init = mangleFunctions(module, init);
         List<String> result = new ArrayList<>();
         for (String s : init) {
             if (s.startsWith("%import")) {
                 String lib = s.substring(8).trim();
-                String dir = "./nvlib/" + lib; // Hardcoded for testing
+                String dir = "./nvylib/" + lib; // Hardcoded for testing
 
                 List<String> importedLines;
                 if(!err.NV_FILE_EXISTS(dir)) {

@@ -1,0 +1,7 @@
+%import nvio.nvy
+
+func main() -> int32 {
+    printf("%s\n", "Hello World!");
+    return 0;
+}
+
