@@ -806,7 +806,44 @@ public class LLVMGenerator {
             result.add(utils.storeToVariable(varValue, storedValue, LLVMUtils.STORETYPE_LITERAL));
         }
 
-        // TODO Arrays
+
+        /*
+        -- TNODE(ASSIGN, VOID)
+            -- TNODE(ARRAY_ACCESS, VOID)
+                -- TNODE(ARRAY, x)
+                -- TNODE(ARRAY_INDEX, 1)
+            -- TNODE(ARRAY_ACCESS, VOID)
+                -- TNODE(ARRAY, x)
+                -- TNODE(ARRAY_INDEX, 0)
+         */
+        else if(valueType == NodeType.ARRAY_ACCESS) {
+
+            // TODO try automating this (grabbing local vs global) inside VariableData or ParserUtils
+            String arrayVariable = variableNode.getSubnode(0).getValueString();
+            if(scopedata.isGlobal(arrayVariable)) arrayVariable = "@global_" + arrayVariable;
+            else arrayVariable = "%" + arrayVariable;
+
+            String otherVariable = valueNode.getSubnode(0).getValueString();
+            if(scopedata.isGlobal(otherVariable)) arrayVariable = "@global_" + otherVariable;
+            else otherVariable = "%" + otherVariable;
+
+            int mainSize = vardata.getArraySize(arrayVariable);
+            String mainIdx = variableNode.getSubnode(1).getValueString();
+            String arrayType = Symbols.nativeTypeToLLVM(vardata.getArrayType(arrayVariable));
+            result.add(utils.getArrayPtr(arrayVariable, arrayType, mainSize, mainIdx));
+            //result.add(utils.loadFromArrayPtr("%" + utils.getLastResult(), arrayVariable, arrayType));
+
+            // We are storing into this address
+            int storeToPtr = utils.getLastResult();
+
+            int otherSize = vardata.getArraySize(otherVariable);
+            String otherIdx = valueNode.getSubnode(1).getValueString();
+            String otherType = Symbols.nativeTypeToLLVM(vardata.getArrayType(otherVariable));
+            result.add(utils.getArrayPtr(otherVariable, otherType, otherSize, otherIdx));
+            result.add(utils.loadFromArrayPtr("%" + utils.getLastResult(), otherVariable, otherType));
+
+            result.add(utils.storeToArrayPtr("%" + storeToPtr, otherType, "%" + utils.getLastResult()));
+        }
 
         // Register-based assignment always comes from needing further evaluation
         else if(valueType == NodeType.FUNCTIONCALL || utils.isArith(valueType) || utils.isLogical(valueType)) {
@@ -822,9 +859,27 @@ public class LLVMGenerator {
             if(scopedata.isGlobal(valueValue)) valueValue = "@global_" + valueValue;
             else valueValue = "%" + valueValue;
 
+            /*
+               TODO
+               this is a hack. Eventually, write a self-contained expression evaluator
+               so not every function needs a whole tree like this
+             */
             result.add(utils.dereferenceVariable(valueValue));
-            utils.initializeType("%" + utils.getLastResult(), vardata.getType(varValue));
-            result.add(utils.storeToVariable(varValue, utils.getLastResult(), LLVMUtils.STORETYPE_VARIABLE));
+            err.auto(result);
+            //utils.initializeType("%" + utils.getLastResult(), vardata.getType(varValue));
+
+            if(variableNode.getType() == NodeType.ARRAY_ACCESS) {
+                int location = utils.getLastResult();
+                String arrayVariable = "%" + variableNode.getSubnode(0).getValueString();
+                String idx = variableNode.getSubnode(1).getValueString();
+                String type = Symbols.nativeTypeToLLVM(vardata.getArrayType(arrayVariable));
+                int arrSize = vardata.getArraySize(arrayVariable);
+                result.add(utils.getArrayPtr(arrayVariable, type, arrSize, idx));
+                result.add(utils.storeToArrayPtr("%" + utils.getLastResult(), type, "%" + location));
+                err.auto(result);
+            }
+
+            else result.add(utils.storeToVariable(varValue, utils.getLastResult(), LLVMUtils.STORETYPE_VARIABLE));
         }
 
         else if(valueType == NodeType.FINDADDRESS) {

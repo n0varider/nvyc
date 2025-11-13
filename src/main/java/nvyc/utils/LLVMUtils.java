@@ -842,7 +842,7 @@ public class LLVMUtils {
 
     public String loadFromArrayPtr(String ptr, String arrayVariable, String type) {
         StringBuilder builder = new StringBuilder();
-        // %i+1 = load type, type* %i
+        // %i = load type, type* %ptr
         builder
                 .append("\t%")
                 .append(getAndIncrement())
