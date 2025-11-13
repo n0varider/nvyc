@@ -68,7 +68,7 @@ public class Preprocess {
                 }
                 // _nvlang_nvstd_4free_5
                 String moduleId = module.replaceAll("[^a-zA-Z0-9]", "");
-                String newname = String.format("_nvlang_%s_%d%s_%d", moduleId, temp.length(), temp, module.length());
+                String newname = String.format("_nvylang_%s_%d%s_%d", moduleId, temp.length(), temp, module.length());
                 replacement = line.replace(temp, newname);
                 // All function names in a module will be "modulename_function"
                 newlist.add(replacement);

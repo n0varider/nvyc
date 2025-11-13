@@ -220,19 +220,6 @@ public class LLVMUtils {
         };
     }
 
-    public String loadVariable(NodeType t, String name, boolean scoped, Object aux1, Object aux2) {
-        String type = nativeTypeToLLVM(t);
-
-        if(aux2 != null && (boolean) aux2) {
-            return String.format("\t%%%d = %s\n", (int) aux1, name);
-        }
-        return String.format("\t%%%d = load %s, %s* %s\n",
-                (int) aux1,
-                type,
-                type,
-                scoped ? "@global_" + name : "%" + name);
-    }
-
     public boolean isLiteral(NASTNode n) {
         return Set.of(NodeType.INT32, NodeType.INT64, NodeType.FP32, NodeType.FP64, NodeType.CHAR, NodeType.SHORT).contains(n.getType());
     }
@@ -431,6 +418,7 @@ public class LLVMUtils {
         StringBuilder builder = new StringBuilder();
         String type = vardata.getLlvmType(ptr);
 
+
         // "\t%d = load type, type* %ptr
         builder
                 .append("\t%")
@@ -455,7 +443,6 @@ public class LLVMUtils {
     public String dereferencePointer(String ptr) {
         StringBuilder builder = new StringBuilder();
         String type = vardata.getLlvmType(ptr);
-
 
         long starcount = type.chars().filter(c -> c == '*').count();
         if(starcount == 0) {

@@ -365,6 +365,19 @@ public class LLVMGenerator {
             result.add(utils.returnValue(returnValue, returnType));
         }
 
+        else if(utils.hasMembers(returnNode)) {
+            String variable = "%" + returnNode.getValueString();
+            String struct = vardata.getLlvmType(variable);
+            String member = returnNode.getSubnode(0).getValueString();
+            int pos = vardata.getStructMemberIndex(struct, member);
+            NodeType type = vardata.getStructMemberType(struct, member);
+            NodeType startype = NodeType.valueOf(type.toString().replace("_T", "") + "_STAR");
+            List<String> res = utils.accessMemberNode(variable, struct, member, pos, startype);
+            result.add(res.get(1));
+            result.add(utils.dereferencePointer(res.get(0)));
+            result.add(utils.returnValue("%" + utils.getLastResult(), type));
+        }
+
         // Variables
         else if(returnType == NodeType.VARIABLE) {
             if(scopedata.isGlobal(returnValue)) returnValue = "@global_" + returnValue;
@@ -864,22 +877,28 @@ public class LLVMGenerator {
                this is a hack. Eventually, write a self-contained expression evaluator
                so not every function needs a whole tree like this
              */
-            result.add(utils.dereferenceVariable(valueValue));
-            err.auto(result);
+
+            String location = "";
+            if(!vardata.isFunctionVariable(valueValue)) {
+                result.add(utils.dereferenceVariable(valueValue));
+                location = "%" + utils.getLastResult();
+            }
+            else{
+                location = valueValue;
+            }
+
             //utils.initializeType("%" + utils.getLastResult(), vardata.getType(varValue));
 
             if(variableNode.getType() == NodeType.ARRAY_ACCESS) {
-                int location = utils.getLastResult();
                 String arrayVariable = "%" + variableNode.getSubnode(0).getValueString();
                 String idx = variableNode.getSubnode(1).getValueString();
                 String type = Symbols.nativeTypeToLLVM(vardata.getArrayType(arrayVariable));
                 int arrSize = vardata.getArraySize(arrayVariable);
                 result.add(utils.getArrayPtr(arrayVariable, type, arrSize, idx));
-                result.add(utils.storeToArrayPtr("%" + utils.getLastResult(), type, "%" + location));
-                err.auto(result);
+                result.add(utils.storeToArrayPtr("%" + utils.getLastResult(), type, location));
             }
 
-            else result.add(utils.storeToVariable(varValue, utils.getLastResult(), LLVMUtils.STORETYPE_VARIABLE));
+            else result.add(utils.storeToVariable(varValue, location, LLVMUtils.STORETYPE_LITERAL));
         }
 
         else if(valueType == NodeType.FINDADDRESS) {
@@ -1086,13 +1105,14 @@ public class LLVMGenerator {
             if(fundata.hasLlvmType(value.getValueString())) {
                 String llvm = fundata.getLlvmReturnType(value.getValueString());
                 result.add(utils.allocateSpace(name, llvm));
+                vardata.setLlvmType(name, llvm);
             }else {
                 result.add(utils.allocateSpace(name, type));
+                utils.initializeType(name, type);
             }
 
             // Type is now available from either scanning the expression tree or checking function return type
             result.addAll(compileLLVM(value));
-            utils.initializeType(name, type);
             utils.initializeType("%" + utils.getLastResult(), type);
             vardata.loadTo(name, utils.getLastResult());
             result.add(utils.storeToVariable(name, utils.getLastResult(), LLVMUtils.STORETYPE_REGISTER));
