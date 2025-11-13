@@ -2,7 +2,7 @@
 
 A language compiler targeting LLVM.
 
-This is a person project I have been working on on-and-off for about 2-3 years now with the goal of looking up as little as possible to see how far I could get on my own. 
+This is a personal project I have been working on on-and-off for about 2-3 years now with the goal of looking up as little as possible to see how far I could get on my own. 
 
 Currently implemented features:
 - Functions
