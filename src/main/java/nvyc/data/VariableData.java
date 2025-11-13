@@ -50,6 +50,8 @@ public class VariableData {
         llvmMap.put(variable, struct);
     }
 
+
+
     public void allocateRegister(String name) {
         usedRegisters.add(name);
     }
@@ -102,8 +104,8 @@ public class VariableData {
     private void createStruct(String struct) {
         if(!structMap.containsKey(struct)) {
             structMap.put(struct, new ArrayList<>());
-            structMap.get(struct).add(new HashMap<>());
-            structMap.get(struct).add(new HashMap<>());
+            structMap.get(struct).add(new HashMap<>()); // STRUCT_VARIABLES
+            structMap.get(struct).add(new HashMap<>()); // STRUCT_TYPES
         }
     }
 
@@ -124,9 +126,13 @@ public class VariableData {
         return (NodeType) structMap.get(struct).get(STRUCT_TYPES).get(member);
     }
 
+    public Map<String, Object> getStructTypes(String struct) {
+        return structMap.get(struct).get(STRUCT_TYPES);
+    }
+
     // Expensive
     public String getStructMemberFromPos(String struct, int pos) {
-        if(!structMap.containsKey(struct)) return "NO STRUCT FOUND";
+        if(!structMap.containsKey(struct)) return "NO STRUCT FOUND"; // TODO should throw a compile-time error, saying the struct doesn't exist
         Map<String, Object> map = structMap.get(struct).get(STRUCT_VARIABLES);
         for(String s : map.keySet()) {
             if((int) map.get(s) == pos) {

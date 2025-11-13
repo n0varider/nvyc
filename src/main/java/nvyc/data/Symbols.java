@@ -203,10 +203,21 @@ public class Symbols {
 
     public static int sizeof(NodeType type) {
         return switch (type) {
+            case CHAR -> 1;
+            case BOOL -> 1;
+            case SHORT -> 2;
             case INT32 -> 4;
             case FP32 -> 4;
             case INT64 -> 8;
             case FP64 -> 8;
+
+            // Pointers
+            case INT32_STAR, INT64_STAR,
+                 FP32_STAR, FP64_STAR,
+                 STR_STAR, CHAR_STAR,
+                 VOID_STAR, BOOL_STAR,
+                 STRUCT_STAR, FUNCTION_STAR,
+                 UNIFIED_STAR -> 8;
 
             default -> -1;
             // special cases, are here just for display but are handled via the caller
