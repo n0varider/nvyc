@@ -10,6 +10,7 @@ public class ASTCleanup {
 
     public void resolveMangledNames(List<NASTNode> nodes, Map<String, String> mapping) {
         for(NASTNode node : nodes) {
+            System.out.println(node);
             resolveNodes(node, mapping);
         }
     }

@@ -14,7 +14,6 @@ import java.util.Stack;
 
 public class Parser {
 
-    private boolean isUnary = true;
     private ParserUtils utils = new ParserUtils();
     private FunctionData fundata = FunctionData.getInstance();
     private VariableData vardata = VariableData.getInstance();
@@ -61,7 +60,14 @@ public class Parser {
                 yield new NASTNode(NodeType.PTRDEREF, stream.getValue());
             }
             // TODO generics
-            default -> null;
+
+            case MUL -> {
+                stream.setType(NodeType.PTRDEREF);
+                stream.setValue(stream.next().getValue());
+                stream.next().remove();
+                yield parseAssign(stream);
+            }
+            default -> throw new IllegalStateException("Encountered unknown pattern: \n" + stream);
         };
     }
 
@@ -419,7 +425,8 @@ public class Parser {
         }
 
         else if(ptrderef) {
-            head = new NASTNode(NodeType.PTRDEREF, name);
+            head = new NASTNode(NodeType.PTRDEREF, NodeType.VOID);
+            head.addNode(new NASTNode(NodeType.VARIABLE, name), NASTNode.TAIL);
             //utils.derefAssign(name, value);
         }
 
