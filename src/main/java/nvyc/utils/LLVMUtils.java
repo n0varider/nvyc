@@ -432,6 +432,9 @@ public class LLVMUtils {
                 .append("\n");
 
         // Set the type of the register and load the pointer to the register
+        err.auto(vardata.getTypeMap());
+        err.auto(vardata.getLlvmMap());
+        err.auto(type, ptr);
         initializeType("%" + getLastResult(), llvmToNative(type));
 
         vardata.setLlvmType("%" + getLastResult(), type);
@@ -670,14 +673,14 @@ public class LLVMUtils {
         return builder.toString();
     }
 
-    public String movePointerToVariable(String variable, int register) {
+    public String movePointerToVariable(String register, String type) {
         StringBuilder builder = new StringBuilder();
-        String type = vardata.getLlvmType(variable);
+        //String type = vardata.getLlvmType(variable);
 
         // %variable = inttoptr i64 %register to type*
         builder
                 .append("\t")
-                .append(variable)
+                .append(getAndIncrement())
                 .append(" = inttoptr i64 ")
                 .append("%")
                 .append(register)

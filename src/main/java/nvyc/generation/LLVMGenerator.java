@@ -757,7 +757,9 @@ public class LLVMGenerator {
             varValue = variableNode.getSubnode(0).getValueString();
         }
 
-
+        if(variableNode.getType() == NodeType.PTRDEREF) {
+            varValue = variableNode.getSubnode(0).getValueString();
+        }
         if(scopedata.isGlobal(varValue)) varValue = "@global_" + varValue;
         else varValue = "%" + varValue;
 
@@ -780,7 +782,6 @@ public class LLVMGenerator {
 
         if(variableNode.getType() == NodeType.PTRDEREF) {
             String llvmtype = vardata.getLlvmType(varValue);
-
             if(hasMembers) {
                 varValue = "%" + utils.getLastResult();
                 String struct = vardata.getLlvmType(varValue);
@@ -789,7 +790,8 @@ public class LLVMGenerator {
                 result.add(utils.extractMember(varValue, struct, pos, memberType.toString()));
                 result.add(utils.dereferenceVariable("%" + utils.getLastResult()));
             }else{
-                result.add(utils.dereferenceVariable(varValue));
+                err.auto(variableNode, "\n", valueNode);
+
             }
 
             varValue = "%" + utils.getLastResult();
@@ -1412,7 +1414,6 @@ public class LLVMGenerator {
                 default -> result.addAll(compileLLVM(node));
             }
         }
-
         return result;
     }
 }
